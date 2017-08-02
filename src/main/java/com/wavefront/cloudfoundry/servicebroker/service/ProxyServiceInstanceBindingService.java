@@ -4,6 +4,7 @@ import com.wavefront.cloudfoundry.servicebroker.config.ProxyConfig;
 import com.wavefront.cloudfoundry.servicebroker.model.Route;
 import com.wavefront.cloudfoundry.servicebroker.model.ServiceInstanceBinding;
 import com.wavefront.cloudfoundry.servicebroker.repository.ProxyServiceInstanceBindingRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingDoesNotExistException;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceBindingExistsException;
@@ -26,53 +27,53 @@ import java.util.UUID;
 @Service
 public class ProxyServiceInstanceBindingService implements ServiceInstanceBindingService {
 
-    private ProxyServiceInstanceBindingRepository repository;
+  private ProxyServiceInstanceBindingRepository repository;
 
-    private ProxyConfig proxyConfig;
+  private ProxyConfig proxyConfig;
 
-    @Autowired
-    public ProxyServiceInstanceBindingService(ProxyConfig config, ProxyServiceInstanceBindingRepository repository) {
-        this.proxyConfig = config;
-        this.repository = repository;
+  @Autowired
+  public ProxyServiceInstanceBindingService(ProxyConfig config, ProxyServiceInstanceBindingRepository repository) {
+    this.proxyConfig = config;
+    this.repository = repository;
+  }
+
+  @Override
+  public CreateServiceInstanceBindingResponse createServiceInstanceBinding(CreateServiceInstanceBindingRequest request) {
+
+    String bindingId = request.getBindingId();
+    String serviceInstanceId = request.getServiceInstanceId();
+
+    ServiceInstanceBinding binding = repository.findOne(bindingId);
+    if (binding != null) {
+      throw new ServiceInstanceBindingExistsException(serviceInstanceId, bindingId);
     }
 
-    @Override
-    public CreateServiceInstanceBindingResponse createServiceInstanceBinding(CreateServiceInstanceBindingRequest request) {
+    Route route = new Route();
+    route.setId(UUID.randomUUID().toString());
+    route.setHostname(proxyConfig.getHostname());
+    route.setPort(proxyConfig.getPort());
 
-        String bindingId = request.getBindingId();
-        String serviceInstanceId = request.getServiceInstanceId();
+    binding = new ServiceInstanceBinding(bindingId, serviceInstanceId, route, request.getBoundAppGuid());
+    repository.save(binding);
 
-        ServiceInstanceBinding binding = repository.findOne(bindingId);
-        if (binding != null) {
-            throw new ServiceInstanceBindingExistsException(serviceInstanceId, bindingId);
-        }
+    return new CreateServiceInstanceAppBindingResponse().withCredentials(wrapCredentials(route));
+  }
 
-        Route route = new Route();
-        route.setId(UUID.randomUUID().toString());
-        route.setHostname(proxyConfig.getHostname());
-        route.setPort(proxyConfig.getPort());
+  @Override
+  public void deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest request) {
+    String bindingId = request.getBindingId();
+    ServiceInstanceBinding binding = repository.findOne(bindingId);
 
-        binding = new ServiceInstanceBinding(bindingId, serviceInstanceId, route, request.getBoundAppGuid());
-        repository.save(binding);
-
-        return new CreateServiceInstanceAppBindingResponse().withCredentials(wrapCredentials(route));
+    if (binding == null) {
+      throw new ServiceInstanceBindingDoesNotExistException(bindingId);
     }
+    repository.delete(bindingId);
+  }
 
-    @Override
-    public void deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest request) {
-        String bindingId = request.getBindingId();
-        ServiceInstanceBinding binding = repository.findOne(bindingId);
-
-        if (binding == null) {
-            throw new ServiceInstanceBindingDoesNotExistException(bindingId);
-        }
-        repository.delete(bindingId);
-    }
-
-    private Map<String, Object> wrapCredentials(Route creds) {
-        Map<String, Object> credsMap = new HashMap<>();
-        credsMap.put("hostname", creds.getHostname());
-        credsMap.put("port", creds.getPort());
-        return credsMap;
-    }
+  private Map<String, Object> wrapCredentials(Route creds) {
+    Map<String, Object> credsMap = new HashMap<>();
+    credsMap.put("hostname", creds.getHostname());
+    credsMap.put("port", creds.getPort());
+    return credsMap;
+  }
 }

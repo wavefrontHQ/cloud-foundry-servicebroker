@@ -2,6 +2,7 @@ package com.wavefront.cloudfoundry.servicebroker.service;
 
 import com.wavefront.cloudfoundry.servicebroker.model.ServiceInstance;
 import com.wavefront.cloudfoundry.servicebroker.repository.ProxyServiceInstanceRepository;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,79 +28,78 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 public class ProxyServiceInstanceServiceTest {
 
-    @Mock
-    private ProxyServiceInstanceRepository repository;
+  @Mock
+  private ProxyServiceInstanceRepository repository;
 
-    private ProxyServiceInstanceService service;
+  private ProxyServiceInstanceService service;
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-        service = new ProxyServiceInstanceService(repository);
-    }
+  @Before
+  public void setup() {
+    MockitoAnnotations.initMocks(this);
+    service = new ProxyServiceInstanceService(repository);
+  }
 
-    @Test
-    public void newServiceInstanceCreatedSuccessfully() throws Exception {
-        when(repository.findOne(any(String.class))).thenReturn(null);
+  @Test
+  public void newServiceInstanceCreatedSuccessfully() throws Exception {
+    when(repository.findOne(any(String.class))).thenReturn(null);
 
-        CreateServiceInstanceResponse response = service.createServiceInstance(buildCreateRequest());
+    CreateServiceInstanceResponse response = service.createServiceInstance(buildCreateRequest());
 
-        assertNotNull(response);
-        assertNull(response.getDashboardUrl());
-        assertFalse(response.isAsync());
+    assertNotNull(response);
+    assertNull(response.getDashboardUrl());
+    assertFalse(response.isAsync());
 
-        verify(repository).save(isA(ServiceInstance.class));
-    }
-
-
-
-    @Test(expected=ServiceInstanceExistsException.class)
-    public void serviceInstanceCreationFailsWithExistingInstance() throws Exception {
-        ServiceInstance instance = buildServiceInstance();
-        when(repository.findOne(any(String.class))).thenReturn(instance);
-        service.createServiceInstance(buildCreateRequest());
-    }
-
-    @Test
-    public void serviceInstanceDeletedSuccessfully() throws Exception {
-        ServiceInstance instance = buildServiceInstance();
-        when(repository.findOne(any(String.class))).thenReturn(instance);
-        String id = instance.getServiceInstanceId();
-
-        DeleteServiceInstanceResponse response = service.deleteServiceInstance(buildDeleteRequest());
-
-        assertNotNull(response);
-        assertFalse(response.isAsync());
-
-        verify(repository).delete(id);
-    }
+    verify(repository).save(isA(ServiceInstance.class));
+  }
 
 
-    @Test(expected = ServiceInstanceDoesNotExistException.class)
-    public void unknownServiceInstanceDeleteCallSuccessful() throws Exception {
-        when(repository.findOne(any(String.class))).thenReturn(null);
+  @Test(expected = ServiceInstanceExistsException.class)
+  public void serviceInstanceCreationFailsWithExistingInstance() throws Exception {
+    ServiceInstance instance = buildServiceInstance();
+    when(repository.findOne(any(String.class))).thenReturn(instance);
+    service.createServiceInstance(buildCreateRequest());
+  }
 
-        DeleteServiceInstanceRequest request = buildDeleteRequest();
+  @Test
+  public void serviceInstanceDeletedSuccessfully() throws Exception {
+    ServiceInstance instance = buildServiceInstance();
+    when(repository.findOne(any(String.class))).thenReturn(instance);
+    String id = instance.getServiceInstanceId();
 
-        DeleteServiceInstanceResponse response = service.deleteServiceInstance(request);
+    DeleteServiceInstanceResponse response = service.deleteServiceInstance(buildDeleteRequest());
 
-        assertNotNull(response);
-        assertFalse(response.isAsync());
+    assertNotNull(response);
+    assertFalse(response.isAsync());
 
-        verify(repository).delete(request.getServiceInstanceId());
-    }
+    verify(repository).delete(id);
+  }
 
-    private ServiceInstance buildServiceInstance() {
-        CreateServiceInstanceRequest request = buildCreateRequest();
-        ServiceInstance instance = new ServiceInstance(request);
-        return instance;
-    }
 
-    private CreateServiceInstanceRequest buildCreateRequest() {
-        return ServiceInstanceFixture.buildCreateServiceInstanceRequest(false);
-    }
+  @Test(expected = ServiceInstanceDoesNotExistException.class)
+  public void unknownServiceInstanceDeleteCallSuccessful() throws Exception {
+    when(repository.findOne(any(String.class))).thenReturn(null);
 
-    private DeleteServiceInstanceRequest buildDeleteRequest() {
-        return ServiceInstanceFixture.buildDeleteServiceInstanceRequest(false);
-    }
+    DeleteServiceInstanceRequest request = buildDeleteRequest();
+
+    DeleteServiceInstanceResponse response = service.deleteServiceInstance(request);
+
+    assertNotNull(response);
+    assertFalse(response.isAsync());
+
+    verify(repository).delete(request.getServiceInstanceId());
+  }
+
+  private ServiceInstance buildServiceInstance() {
+    CreateServiceInstanceRequest request = buildCreateRequest();
+    ServiceInstance instance = new ServiceInstance(request);
+    return instance;
+  }
+
+  private CreateServiceInstanceRequest buildCreateRequest() {
+    return ServiceInstanceFixture.buildCreateServiceInstanceRequest(false);
+  }
+
+  private DeleteServiceInstanceRequest buildDeleteRequest() {
+    return ServiceInstanceFixture.buildDeleteServiceInstanceRequest(false);
+  }
 }

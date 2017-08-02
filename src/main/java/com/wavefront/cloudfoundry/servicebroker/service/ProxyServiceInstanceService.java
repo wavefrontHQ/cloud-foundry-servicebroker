@@ -2,6 +2,7 @@ package com.wavefront.cloudfoundry.servicebroker.service;
 
 import com.wavefront.cloudfoundry.servicebroker.model.ServiceInstance;
 import com.wavefront.cloudfoundry.servicebroker.repository.ProxyServiceInstanceRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceDoesNotExistException;
 import org.springframework.cloud.servicebroker.exception.ServiceInstanceExistsException;
@@ -20,54 +21,54 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProxyServiceInstanceService implements ServiceInstanceService {
 
-    private ProxyServiceInstanceRepository repository;
+  private ProxyServiceInstanceRepository repository;
 
-    @Autowired
-    public ProxyServiceInstanceService(ProxyServiceInstanceRepository repository) {
-        this.repository = repository;
+  @Autowired
+  public ProxyServiceInstanceService(ProxyServiceInstanceRepository repository) {
+    this.repository = repository;
+  }
+
+  @Override
+  public CreateServiceInstanceResponse createServiceInstance(CreateServiceInstanceRequest request) {
+
+    ServiceInstance instance = repository.findOne(request.getServiceInstanceId());
+    if (instance != null) {
+      throw new ServiceInstanceExistsException(request.getServiceInstanceId(), request.getServiceDefinitionId());
     }
 
-    @Override
-    public CreateServiceInstanceResponse createServiceInstance(CreateServiceInstanceRequest request) {
+    instance = new ServiceInstance(request);
+    repository.save(instance);
+    return new CreateServiceInstanceResponse();
+  }
 
-        ServiceInstance instance = repository.findOne(request.getServiceInstanceId());
-        if (instance != null) {
-            throw new ServiceInstanceExistsException(request.getServiceInstanceId(), request.getServiceDefinitionId());
-        }
+  @Override
+  public GetLastServiceOperationResponse getLastOperation(GetLastServiceOperationRequest request) {
+    return new GetLastServiceOperationResponse().withOperationState(OperationState.SUCCEEDED);
+  }
 
-        instance = new ServiceInstance(request);
-        repository.save(instance);
-        return new CreateServiceInstanceResponse();
+  @Override
+  public DeleteServiceInstanceResponse deleteServiceInstance(DeleteServiceInstanceRequest request) {
+    String id = request.getServiceInstanceId();
+    ServiceInstance instance = repository.findOne(id);
+    if (instance == null) {
+      throw new ServiceInstanceDoesNotExistException(id);
     }
 
-    @Override
-    public GetLastServiceOperationResponse getLastOperation(GetLastServiceOperationRequest request) {
-        return new GetLastServiceOperationResponse().withOperationState(OperationState.SUCCEEDED);
+    repository.delete(id);
+    return new DeleteServiceInstanceResponse();
+  }
+
+  @Override
+  public UpdateServiceInstanceResponse updateServiceInstance(UpdateServiceInstanceRequest request) {
+    String id = request.getServiceInstanceId();
+    ServiceInstance instance = repository.findOne(id);
+    if (instance == null) {
+      throw new ServiceInstanceDoesNotExistException(id);
     }
 
-    @Override
-    public DeleteServiceInstanceResponse deleteServiceInstance(DeleteServiceInstanceRequest request) {
-        String id = request.getServiceInstanceId();
-        ServiceInstance instance = repository.findOne(id);
-        if (instance == null) {
-            throw new ServiceInstanceDoesNotExistException(id);
-        }
-
-        repository.delete(id);
-        return new DeleteServiceInstanceResponse();
-    }
-
-    @Override
-    public UpdateServiceInstanceResponse updateServiceInstance(UpdateServiceInstanceRequest request) {
-        String id = request.getServiceInstanceId();
-        ServiceInstance instance = repository.findOne(id);
-        if (instance == null) {
-            throw new ServiceInstanceDoesNotExistException(id);
-        }
-
-        repository.delete(id);
-        ServiceInstance updatedInstance = new ServiceInstance(request);
-        repository.save(updatedInstance);
-        return new UpdateServiceInstanceResponse();
-    }
+    repository.delete(id);
+    ServiceInstance updatedInstance = new ServiceInstance(request);
+    repository.save(updatedInstance);
+    return new UpdateServiceInstanceResponse();
+  }
 }

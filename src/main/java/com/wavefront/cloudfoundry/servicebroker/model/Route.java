@@ -11,7 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- *
  * @author Vikram Raman
  */
 @Entity
@@ -19,36 +18,36 @@ import javax.persistence.Table;
 @JsonIgnoreProperties({"id"})
 public class Route {
 
-    @Id
-    private String id;
+  @Id
+  private String id;
 
-    @Column(nullable = false)
-    private String hostname;
+  @Column(nullable = false)
+  private String hostname;
 
-    @Column(nullable = false)
-    private int port;
+  @Column(nullable = false)
+  private int port;
 
-    public String getId() {
-        return id;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    public String getHostname() {
-        return hostname;
-    }
+  public String getHostname() {
+    return hostname;
+  }
 
-    public void setHostname(String hostname) {
-        this.hostname = hostname;
-    }
+  public void setHostname(String hostname) {
+    this.hostname = hostname;
+  }
 
-    public int getPort() {
-        return port;
-    }
+  public int getPort() {
+    return port;
+  }
 
-    public void setPort(int port) {
-        this.port = port;
-    }
+  public void setPort(int port) {
+    this.port = port;
+  }
 }
