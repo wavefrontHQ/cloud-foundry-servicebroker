@@ -1,0 +1,16 @@
+---
+applications:
+- name: wavefront-proxy-service-broker
+  instances: 1
+  memory: 1G
+  path: target/wavefront-cloudfoundry-broker-0.0.1-SNAPSHOT.jar
+  buildpack: https://github.com/cloudfoundry/java-buildpack.git
+  # change the route domain name accordingly
+  route:
+  - route: wavefront-proxy-service-broker.apps.wavefront.io
+  env:
+    SECURITY_USER_NAME: admin
+    SECURITY_USER_PASSWORD: admin
+    # change the hostname and port accordingly
+    wavefront.proxy.hostname: tcp.wavefront.io
+    wavefront.proxy.port: 1099
