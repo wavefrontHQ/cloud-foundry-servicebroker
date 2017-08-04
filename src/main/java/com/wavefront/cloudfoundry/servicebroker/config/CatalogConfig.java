@@ -50,7 +50,7 @@ public class CatalogConfig {
     metadata.put("imageUrl", "https://s3-us-west-2.amazonaws.com/wavefront-img/wavefront_by_vmware_logo.png");
     metadata.put("longDescription", "Wavefront Proxy Service");
     metadata.put("providerDisplayName", "VMWare, Inc.");
-    metadata.put("documentationUrl", "https://github.com/wavefrontHQ/cloudfoundry-servicebroker");
+    metadata.put("documentationUrl", "https://github.com/wavefrontHQ/cloud-foundry-servicebroker");
     return metadata;
   }
 

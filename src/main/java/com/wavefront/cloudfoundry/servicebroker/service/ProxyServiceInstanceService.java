@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProxyServiceInstanceService implements ServiceInstanceService {
 
-  private ProxyServiceInstanceRepository repository;
+  private final ProxyServiceInstanceRepository repository;
 
   @Autowired
   public ProxyServiceInstanceService(ProxyServiceInstanceRepository repository) {

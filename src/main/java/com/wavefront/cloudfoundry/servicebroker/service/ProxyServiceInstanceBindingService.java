@@ -27,9 +27,9 @@ import java.util.UUID;
 @Service
 public class ProxyServiceInstanceBindingService implements ServiceInstanceBindingService {
 
-  private ProxyServiceInstanceBindingRepository repository;
+  private final ProxyServiceInstanceBindingRepository repository;
 
-  private ProxyConfig proxyConfig;
+  private final ProxyConfig proxyConfig;
 
   @Autowired
   public ProxyServiceInstanceBindingService(ProxyConfig config, ProxyServiceInstanceBindingRepository repository) {
