@@ -52,6 +52,8 @@ public class ProxyServiceInstanceBindingService implements ServiceInstanceBindin
     route.setId(UUID.randomUUID().toString());
     route.setHostname(proxyConfig.getHostname());
     route.setPort(proxyConfig.getPort());
+    route.setDistributionPort(40000);
+    route.setTracingPort(30000);
 
     binding = new ServiceInstanceBinding(bindingId, serviceInstanceId, route, request.getBoundAppGuid());
     repository.save(binding);
@@ -74,6 +76,8 @@ public class ProxyServiceInstanceBindingService implements ServiceInstanceBindin
     Map<String, Object> credsMap = new HashMap<>();
     credsMap.put("hostname", creds.getHostname());
     credsMap.put("port", creds.getPort());
+    credsMap.put("distributionPort", creds.getDistributionPort());
+    credsMap.put("tracingPort", creds.getTracingPort());
     return credsMap;
   }
 }

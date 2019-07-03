@@ -13,4 +13,6 @@ applications:
     SECURITY_USER_PASSWORD: admin
     # change the hostname and port accordingly
     wavefront.proxy.hostname: tcp.wavefront.io
-    wavefront.proxy.port: 1099
+    wavefront.proxy.port: 2878
+    wavefront.proxy.tracingPort: 30000
+    wavefront.proxy.distributionPort: 40000
