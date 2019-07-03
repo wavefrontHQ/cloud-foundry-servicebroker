@@ -27,6 +27,12 @@ public class Route {
   @Column(nullable = false)
   private int port;
 
+  @Column(nullable = false)
+  private int distributionPort;
+
+  @Column(nullable = false)
+  private int tracingPort;
+
   public String getId() {
     return id;
   }
@@ -50,4 +56,21 @@ public class Route {
   public void setPort(int port) {
     this.port = port;
   }
+
+  public int getDistributionPort() {
+    return distributionPort;
+  }
+
+  public void setDistributionPort(int port) {
+    this.distributionPort = port;
+  }
+
+  public int getTracingPort() {
+    return tracingPort;
+  }
+
+  public void setTracingPort(int port) {
+    this.tracingPort = port;
+  }
+
 }
