@@ -15,4 +15,4 @@ applications:
     wavefront.proxy.hostname: tcp.wavefront.io
     wavefront.proxy.port: 2878
     wavefront.proxy.tracingPort: 30000
-    wavefront.proxy.distributionPort: 40000
+    wavefront.proxy.distributionPort: 2878
