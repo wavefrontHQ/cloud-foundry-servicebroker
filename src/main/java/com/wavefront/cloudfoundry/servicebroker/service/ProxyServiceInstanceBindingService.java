@@ -52,7 +52,7 @@ public class ProxyServiceInstanceBindingService implements ServiceInstanceBindin
     route.setId(UUID.randomUUID().toString());
     route.setHostname(proxyConfig.getHostname());
     route.setPort(proxyConfig.getPort());
-    route.setDistributionPort(40000);
+    route.setDistributionPort(proxyConfig.getPort());
     route.setTracingPort(30000);
 
     binding = new ServiceInstanceBinding(bindingId, serviceInstanceId, route, request.getBoundAppGuid());
