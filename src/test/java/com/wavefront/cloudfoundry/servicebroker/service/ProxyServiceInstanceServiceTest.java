@@ -20,6 +20,8 @@ import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 /**
  * Tests for the {@code ProxyServiceInstanceService}.
  *
@@ -41,7 +43,7 @@ public class ProxyServiceInstanceServiceTest {
 
   @Test
   public void newServiceInstanceCreatedSuccessfully() throws Exception {
-    when(repository.findOne(any(String.class))).thenReturn(null);
+    when(repository.findById(any(String.class))).thenReturn(null);
 
     CreateServiceInstanceResponse response = service.createServiceInstance(buildCreateRequest());
 
@@ -52,32 +54,31 @@ public class ProxyServiceInstanceServiceTest {
     verify(repository).save(isA(ServiceInstance.class));
   }
 
-
   @Test(expected = ServiceInstanceExistsException.class)
   public void serviceInstanceCreationFailsWithExistingInstance() throws Exception {
-    ServiceInstance instance = buildServiceInstance();
-    when(repository.findOne(any(String.class))).thenReturn(instance);
+      Optional<ServiceInstance> instance = buildServiceInstance();
+    when(repository.findById(any(String.class))).thenReturn(instance);
     service.createServiceInstance(buildCreateRequest());
   }
 
   @Test
   public void serviceInstanceDeletedSuccessfully() throws Exception {
-    ServiceInstance instance = buildServiceInstance();
-    when(repository.findOne(any(String.class))).thenReturn(instance);
-    String id = instance.getServiceInstanceId();
+    Optional<ServiceInstance> instance = buildServiceInstance();
+    when(repository.findById(any(String.class))).thenReturn(instance);
+    String id = instance.get().getServiceInstanceId();
 
     DeleteServiceInstanceResponse response = service.deleteServiceInstance(buildDeleteRequest());
 
     assertNotNull(response);
     assertFalse(response.isAsync());
 
-    verify(repository).delete(id);
+    verify(repository).deleteById(id);
   }
 
 
   @Test(expected = ServiceInstanceDoesNotExistException.class)
   public void unknownServiceInstanceDeleteCallSuccessful() throws Exception {
-    when(repository.findOne(any(String.class))).thenReturn(null);
+    when(repository.findById(any(String.class))).thenReturn(null);
 
     DeleteServiceInstanceRequest request = buildDeleteRequest();
 
@@ -86,13 +87,13 @@ public class ProxyServiceInstanceServiceTest {
     assertNotNull(response);
     assertFalse(response.isAsync());
 
-    verify(repository).delete(request.getServiceInstanceId());
+    verify(repository).deleteById(request.getServiceInstanceId());
   }
 
-  private ServiceInstance buildServiceInstance() {
+  private Optional<ServiceInstance> buildServiceInstance() {
     CreateServiceInstanceRequest request = buildCreateRequest();
     ServiceInstance instance = new ServiceInstance(request);
-    return instance;
+    return Optional.of(instance);
   }
 
   private CreateServiceInstanceRequest buildCreateRequest() {

@@ -1,5 +1,7 @@
 package com.wavefront.cloudfoundry.servicebroker.service;
 
+import java.util.Optional;
+
 import com.wavefront.cloudfoundry.servicebroker.model.ServiceInstance;
 import com.wavefront.cloudfoundry.servicebroker.repository.ProxyServiceInstanceRepository;
 
@@ -31,13 +33,12 @@ public class ProxyServiceInstanceService implements ServiceInstanceService {
   @Override
   public CreateServiceInstanceResponse createServiceInstance(CreateServiceInstanceRequest request) {
 
-    ServiceInstance instance = repository.findOne(request.getServiceInstanceId());
-    if (instance != null) {
+    Optional<ServiceInstance> instance = repository.findById(request.getServiceInstanceId());
+    if (instance.isPresent()) {
       throw new ServiceInstanceExistsException(request.getServiceInstanceId(), request.getServiceDefinitionId());
     }
 
-    instance = new ServiceInstance(request);
-    repository.save(instance);
+    repository.save(new ServiceInstance(request));
     return new CreateServiceInstanceResponse();
   }
 
@@ -49,24 +50,24 @@ public class ProxyServiceInstanceService implements ServiceInstanceService {
   @Override
   public DeleteServiceInstanceResponse deleteServiceInstance(DeleteServiceInstanceRequest request) {
     String id = request.getServiceInstanceId();
-    ServiceInstance instance = repository.findOne(id);
-    if (instance == null) {
+    Optional<ServiceInstance> instance = repository.findById(id);
+    if (instance.isEmpty()) {
       throw new ServiceInstanceDoesNotExistException(id);
     }
 
-    repository.delete(id);
+    repository.deleteById(id);
     return new DeleteServiceInstanceResponse();
   }
 
   @Override
   public UpdateServiceInstanceResponse updateServiceInstance(UpdateServiceInstanceRequest request) {
     String id = request.getServiceInstanceId();
-    ServiceInstance instance = repository.findOne(id);
-    if (instance == null) {
+    Optional<ServiceInstance> instance = repository.findById(id);
+    if (instance.isEmpty()) {
       throw new ServiceInstanceDoesNotExistException(id);
     }
 
-    repository.delete(id);
+    repository.deleteById(id);
     ServiceInstance updatedInstance = new ServiceInstance(request);
     repository.save(updatedInstance);
     return new UpdateServiceInstanceResponse();

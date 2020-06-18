@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -38,13 +39,14 @@ public class ProxyServiceInstanceBindingService implements ServiceInstanceBindin
   }
 
   @Override
-  public CreateServiceInstanceBindingResponse createServiceInstanceBinding(CreateServiceInstanceBindingRequest request) {
+  public CreateServiceInstanceBindingResponse createServiceInstanceBinding(
+      CreateServiceInstanceBindingRequest request) {
 
     String bindingId = request.getBindingId();
     String serviceInstanceId = request.getServiceInstanceId();
 
-    ServiceInstanceBinding binding = repository.findOne(bindingId);
-    if (binding != null) {
+    Optional<ServiceInstanceBinding> binding = repository.findById(bindingId);
+    if (binding.isPresent()) {
       throw new ServiceInstanceBindingExistsException(serviceInstanceId, bindingId);
     }
 
@@ -55,8 +57,7 @@ public class ProxyServiceInstanceBindingService implements ServiceInstanceBindin
     route.setDistributionPort(proxyConfig.getPort());
     route.setTracingPort(30000);
 
-    binding = new ServiceInstanceBinding(bindingId, serviceInstanceId, route, request.getBoundAppGuid());
-    repository.save(binding);
+    repository.save(new ServiceInstanceBinding(bindingId, serviceInstanceId, route, request.getBoundAppGuid()));
 
     return new CreateServiceInstanceAppBindingResponse().withCredentials(wrapCredentials(route));
   }
@@ -64,12 +65,12 @@ public class ProxyServiceInstanceBindingService implements ServiceInstanceBindin
   @Override
   public void deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest request) {
     String bindingId = request.getBindingId();
-    ServiceInstanceBinding binding = repository.findOne(bindingId);
+    Optional<ServiceInstanceBinding> binding = repository.findById(bindingId);
 
-    if (binding == null) {
+    if (binding.isEmpty()) {
       throw new ServiceInstanceBindingDoesNotExistException(bindingId);
     }
-    repository.delete(bindingId);
+    repository.deleteById(bindingId);
   }
 
   private Map<String, Object> wrapCredentials(Route creds) {
