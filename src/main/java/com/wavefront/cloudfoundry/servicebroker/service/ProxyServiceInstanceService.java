@@ -51,7 +51,7 @@ public class ProxyServiceInstanceService implements ServiceInstanceService {
   public DeleteServiceInstanceResponse deleteServiceInstance(DeleteServiceInstanceRequest request) {
     String id = request.getServiceInstanceId();
     Optional<ServiceInstance> instance = repository.findById(id);
-    if (instance.isEmpty()) {
+    if (!instance.isPresent()) {
       throw new ServiceInstanceDoesNotExistException(id);
     }
 
@@ -63,7 +63,7 @@ public class ProxyServiceInstanceService implements ServiceInstanceService {
   public UpdateServiceInstanceResponse updateServiceInstance(UpdateServiceInstanceRequest request) {
     String id = request.getServiceInstanceId();
     Optional<ServiceInstance> instance = repository.findById(id);
-    if (instance.isEmpty()) {
+    if (!instance.isPresent()) {
       throw new ServiceInstanceDoesNotExistException(id);
     }
 

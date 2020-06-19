@@ -67,7 +67,7 @@ public class ProxyServiceInstanceBindingService implements ServiceInstanceBindin
     String bindingId = request.getBindingId();
     Optional<ServiceInstanceBinding> binding = repository.findById(bindingId);
 
-    if (binding.isEmpty()) {
+    if (!binding.isPresent()) {
       throw new ServiceInstanceBindingDoesNotExistException(bindingId);
     }
     repository.deleteById(bindingId);
