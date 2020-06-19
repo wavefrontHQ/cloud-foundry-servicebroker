@@ -43,7 +43,7 @@ public class ProxyServiceInstanceServiceTest {
 
   @Test
   public void newServiceInstanceCreatedSuccessfully() throws Exception {
-    when(repository.findById(any(String.class))).thenReturn(null);
+    when(repository.findById(any(String.class))).thenReturn(Optional.empty());
 
     CreateServiceInstanceResponse response = service.createServiceInstance(buildCreateRequest());
 
@@ -78,7 +78,7 @@ public class ProxyServiceInstanceServiceTest {
 
   @Test(expected = ServiceInstanceDoesNotExistException.class)
   public void unknownServiceInstanceDeleteCallSuccessful() throws Exception {
-    when(repository.findById(any(String.class))).thenReturn(null);
+    when(repository.findById(any(String.class))).thenReturn(Optional.empty());
 
     DeleteServiceInstanceRequest request = buildDeleteRequest();
 

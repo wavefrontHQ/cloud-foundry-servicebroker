@@ -66,7 +66,7 @@ public class ProxyServiceInstanceBindingServiceTest {
   @Test
   public void newServiceInstanceBindingCreatedSuccessfully() throws Exception {
 
-    when(repository.findById(any(String.class))).thenReturn(null);
+    when(repository.findById(any(String.class))).thenReturn(Optional.empty());
 
     CreateServiceInstanceAppBindingResponse response =
         (CreateServiceInstanceAppBindingResponse) service.createServiceInstanceBinding(buildCreateRequest());
@@ -102,7 +102,7 @@ public class ProxyServiceInstanceBindingServiceTest {
   public void unknownServiceInstanceDeleteCallSuccessful() throws Exception {
       Optional<ServiceInstanceBinding> binding = buildServiceBindingInstance();
 
-    when(repository.findById(any(String.class))).thenReturn(null);
+    when(repository.findById(any(String.class))).thenReturn(Optional.empty());
 
     service.deleteServiceInstanceBinding(buildDeleteRequest());
     verify(repository, never()).deleteById(binding.get().getId());
