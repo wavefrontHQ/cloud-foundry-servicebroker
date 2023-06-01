@@ -8,6 +8,7 @@ import com.wavefront.cloudfoundry.servicebroker.model.Route;
 import com.wavefront.cloudfoundry.servicebroker.model.ServiceInstance;
 import com.wavefront.cloudfoundry.servicebroker.model.ServiceInstanceBinding;
 import com.wavefront.cloudfoundry.servicebroker.repository.ProxyServiceInstanceBindingRepository;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +48,7 @@ public class ProxyServiceInstanceBindingServiceTest {
   private ProxyServiceInstanceBindingService service;
 
   private ServiceInstance instance;
-  private ServiceInstanceBinding instanceBinding;
+  private Optional<ServiceInstanceBinding> instanceBinding;
 
   @Before
   public void setup() {
@@ -65,7 +66,7 @@ public class ProxyServiceInstanceBindingServiceTest {
   @Test
   public void newServiceInstanceBindingCreatedSuccessfully() throws Exception {
 
-    when(repository.findOne(any(String.class))).thenReturn(null);
+    when(repository.findById(any(String.class))).thenReturn(Optional.empty());
 
     CreateServiceInstanceAppBindingResponse response =
         (CreateServiceInstanceAppBindingResponse) service.createServiceInstanceBinding(buildCreateRequest());
@@ -81,7 +82,7 @@ public class ProxyServiceInstanceBindingServiceTest {
   @Test(expected = ServiceInstanceBindingExistsException.class)
   public void serviceInstanceCreationFailsWithExistingInstance() throws Exception {
 
-    when(repository.findOne(any(String.class)))
+    when(repository.findById(any(String.class)))
         .thenReturn(buildServiceBindingInstance());
 
     service.createServiceInstanceBinding(buildCreateRequest());
@@ -89,22 +90,22 @@ public class ProxyServiceInstanceBindingServiceTest {
 
   @Test
   public void serviceInstanceBindingDeletedSuccessfully() throws Exception {
-    ServiceInstanceBinding binding = buildServiceBindingInstance();
-    when(repository.findOne(any(String.class))).thenReturn(binding);
+      Optional<ServiceInstanceBinding> binding = buildServiceBindingInstance();
+    when(repository.findById(any(String.class))).thenReturn(binding);
 
     service.deleteServiceInstanceBinding(buildDeleteRequest());
-    verify(repository).delete(binding.getId());
+    verify(repository).deleteById(binding.get().getId());
   }
 
 
   @Test(expected = ServiceInstanceBindingDoesNotExistException.class)
   public void unknownServiceInstanceDeleteCallSuccessful() throws Exception {
-    ServiceInstanceBinding binding = buildServiceBindingInstance();
+      Optional<ServiceInstanceBinding> binding = buildServiceBindingInstance();
 
-    when(repository.findOne(any(String.class))).thenReturn(null);
+    when(repository.findById(any(String.class))).thenReturn(Optional.empty());
 
     service.deleteServiceInstanceBinding(buildDeleteRequest());
-    verify(repository, never()).delete(binding.getId());
+    verify(repository, never()).deleteById(binding.get().getId());
   }
 
   private CreateServiceInstanceBindingRequest buildCreateRequest() {
@@ -113,11 +114,11 @@ public class ProxyServiceInstanceBindingServiceTest {
     return new CreateServiceInstanceBindingRequest(instance.getServiceDefinitionId(), instance.getPlanId(),
         "app_guid", bindResource)
         .withServiceInstanceId(instance.getServiceInstanceId())
-        .withBindingId(instanceBinding.getId());
+        .withBindingId(instanceBinding.get().getId());
   }
 
   private DeleteServiceInstanceBindingRequest buildDeleteRequest() {
-    return new DeleteServiceInstanceBindingRequest(instance.getServiceInstanceId(), instanceBinding.getId(),
+    return new DeleteServiceInstanceBindingRequest(instance.getServiceInstanceId(), instanceBinding.get().getId(),
         instance.getServiceDefinitionId(), instance.getPlanId(), null);
   }
 
@@ -127,14 +128,14 @@ public class ProxyServiceInstanceBindingServiceTest {
     return instance;
   }
 
-  private ServiceInstanceBinding buildServiceBindingInstance() {
+  private Optional<ServiceInstanceBinding> buildServiceBindingInstance() {
     CreateServiceInstanceBindingRequest request = ServiceInstanceBindingFixture.buildCreateAppBindingRequest();
     Route route = new Route();
     route.setHostname(HOSTNAME);
     route.setPort(PORT);
     ServiceInstanceBinding instance = new ServiceInstanceBinding(request.getBindingId(),
         request.getServiceInstanceId(), route, request.getAppGuid());
-    return instance;
+    return Optional.of(instance);
   }
 
 }
